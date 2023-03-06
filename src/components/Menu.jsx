@@ -1,16 +1,18 @@
 import React from "react";
 import { getContext } from "../Context";
 
-export default function Menu({ visible }) {
+export default function Menu() {
   const { state, setState } = getContext();
-  const { level } = state;
-  const { setLevel } = setState;
+  const { level, menuVisible } = state;
+  const { setLevel, setMenuVisible } = setState;
 
   return (
-    visible && (
+    menuVisible && (
       <div>
         <div className="container">
-          <div className="start-button">Start</div>
+          <div className="start-button" onClick={() => setMenuVisible(false)}>
+            Start
+          </div>
           <div className="level-input">
             <input
               type="number"

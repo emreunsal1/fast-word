@@ -1,8 +1,8 @@
 import words from "./words.json";
 
-export const generateRandomWord = (maxL = 20, minL = 3, length = 3) => {
+export const generateRandomWord = (minL = 3, length = 3) => {
   const result = words.filter((word) => {
-    if (word.length < maxL && word.length > minL) {
+    if (word.length < 20 && word.length > minL) {
       return word;
     }
   });
