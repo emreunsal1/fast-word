@@ -7,76 +7,60 @@ function App() {
   const { state, setState } = getContext();
   const { menuVisible, level } = state;
   const { setLevel } = setState;
-  const [words, setWords] = useState([]);
+  const [words, setWords] = useState();
   const [letters, setLetters] = useState("");
   const [showWord, setShowWord] = useState([]);
-  const [count, setCount] = useState(0);
-  const [mockLevel, setMockLevel] = useState(null);
+  const [count, setCount] = useState(3);
+
   const intervalId = useRef(null);
+  const mockLevel = useRef(null);
 
   useEffect(() => {
-    setWords(generateRandomWord(level * 2, level * 3));
-  }, []);
+    const newShowWord = showWord.filter((item, index) => letters !== item);
+    setShowWord(newShowWord);
+  }, [letters]);
 
   useEffect(() => {
-    if (!menuVisible) {
-      setShowWord(words[mockLevel]);
-    }
-    if (mockLevel === 0) {
+    if (count === 0) {
       clearInterval(intervalId.current);
       intervalId.current = null;
-      setShowWord([]);
-      setTimeout(() => {
-        setLevel((prev) => prev + 1);
-        showWordWindow();
-      }, 3000);
-    }
-  }, [mockLevel]);
-
-  useEffect(() => {
-    clearInterval(intervalId.current);
-    intervalId.current = null;
-    setWords(generateRandomWord(level * 2, level * 3));
-    setMockLevel(level * 3 - 1);
-    showWordWindow();
-  }, [level]);
-
-  useEffect(() => {
-    if (count === 0 && intervalId.current !== null) {
-      clearInterval(intervalId.current);
-      intervalId.current = null;
-      showWordWindow();
+      startGame();
     }
   }, [count]);
 
   useEffect(() => {
-    !menuVisible && startGame();
-  }, [menuVisible]);
-
-  const startGame = () => {
-    if (intervalId.current !== null) {
+    if (mockLevel.current < 0) {
+      console.log("clear oldu garam");
       clearInterval(intervalId.current);
       intervalId.current = null;
+      mockLevel.current = null;
     }
-    setCount(3);
+  }, [mockLevel.current]);
+
+  const startClickHandler = () => {
     intervalId.current = setInterval(() => {
       setCount((prev) => prev - 1);
     }, 1000);
   };
 
-  const showWordWindow = () => {
-    console.log("show rword", intervalId.current);
-    console.log("abc fmock çeve", mockLevel);
-    clearInterval(intervalId.current);
-    intervalId.current = null;
+  const startGame = () => {
+    const result = generateRandomWord(3, level * 3);
+    setWords(result);
+    mockLevel.current = level * 3;
+    windowShowWord(result);
+  };
+
+  const windowShowWord = (result) => {
+    console.log("result", result);
     intervalId.current = setInterval(() => {
-      setMockLevel((prev) => prev - 1);
-    }, 2000);
+      setShowWord((prev) => [...prev, result[mockLevel.current]]);
+      mockLevel.current = mockLevel.current - 1;
+    }, 3000);
   };
 
   return (
     <div className="App">
-      <Menu />
+      <Menu startClickHandler={startClickHandler} />
       {!menuVisible && <div className="cont">{count}</div>}
       <div className="word"> {showWord}</div>
       <input onChange={(e) => setLetters(e.target.value)} />

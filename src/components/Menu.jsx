@@ -1,7 +1,7 @@
 import React from "react";
 import { getContext } from "../Context";
 
-export default function Menu() {
+export default function Menu({ startClickHandler }) {
   const { state, setState } = getContext();
   const { level, menuVisible } = state;
   const { setLevel, setMenuVisible } = setState;
@@ -10,7 +10,13 @@ export default function Menu() {
     menuVisible && (
       <div>
         <div className="container">
-          <div className="start-button" onClick={() => setMenuVisible(false)}>
+          <div
+            className="start-button"
+            onClick={() => {
+              setMenuVisible(false);
+              startClickHandler();
+            }}
+          >
             Start
           </div>
           <div className="level-input">
