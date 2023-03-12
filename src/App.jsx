@@ -12,6 +12,7 @@ function App() {
   const [letters, setLetters] = useState("");
   const [showWord, setShowWord] = useState([]);
   const [count, setCount] = useState(3);
+  const [boxPosition, setBoxPosition] = useState([]);
 
   const intervalId = useRef(null);
   const mockLevel = useRef(null);
@@ -38,6 +39,7 @@ function App() {
       clearInterval(intervalId.current);
       intervalId.current = null;
       mockLevel.current = null;
+      setBoxPosition([]);
       return;
     }
   }, [mockLevel.current]);
@@ -69,6 +71,7 @@ function App() {
   const windowShowWord = (result) => {
     intervalId.current = setInterval(() => {
       const prevMockLevel = Number(mockLevel.current);
+      setBoxPosition((prev) => [...prev, Math.floor(Math.random() * 100)]);
       setShowWord((prev) => {
         mockLevel.current = prevMockLevel - 1;
         return [...prev, result[prevMockLevel]];
@@ -78,23 +81,33 @@ function App() {
 
   return (
     <div className="App">
-      <Menu startClickHandler={startClickHandler} />
-      {!menuVisible && <div className="cont">{count}</div>}
-      {showWord.map((word, index) => {
-        return (
-          <div className="word" key={index}>
-            {word.split("").map((letter, index) => (
-              <span
+      <div className="container">
+        <Menu startClickHandler={startClickHandler} />
+        {!menuVisible && count !== 0 && <div className="cont">{count}</div>}
+        <div className="fly-body">
+          {showWord.map((word, index) => {
+            return (
+              <div
+                className="word-box"
+                style={{ left: `${boxPosition[index]}%` }}
                 key={index}
-                className={letters[index] === letter ? "active" : ""}
               >
-                {letter}
-              </span>
-            ))}
-          </div>
-        );
-      })}
-      <input onChange={(e) => setLetters(e.target.value)} value={letters} />
+                {word.split("").map((letter, index) => (
+                  <span
+                    key={index}
+                    className={letters[index] === letter ? "active" : ""}
+                  >
+                    {letter}
+                  </span>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+        <div className="input-container">
+          <input onChange={(e) => setLetters(e.target.value)} value={letters} />
+        </div>
+      </div>
     </div>
   );
 }

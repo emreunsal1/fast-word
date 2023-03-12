@@ -1,0 +1,27 @@
+#Menu {
+  position: absolute;
+  top: calc(50% - 100px);
+  left: calc(50% - 100px);
+  width: 200px;
+  height: 200px;
+
+  .container {
+    border: 1px solid gray;
+    display: flex;
+    align-items: center;
+    .wrapper {
+      width: 100%;
+      .level-input {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+        input {
+        }
+      }
+      .start-button {
+        text-align: center;
+      }
+    }
+  }
+}
