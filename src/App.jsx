@@ -16,14 +16,17 @@ function App() {
 
   const intervalId = useRef(null);
   const mockLevel = useRef(null);
+  const skyInterval = useRef([]);
 
   useEffect(() => {
-    if (letters === showWord[0]) {
-      const newArray = Array.from(showWord);
-      newArray.shift();
-      setShowWord(newArray);
-      setLetters("");
+    if(showWord.includes(letters)){
+      const result = showWord.filter((item)=> item !== letters);
+      if(result.length || showWord[0] === letters){
+       setShowWord(result);
+        setLetters("");
+      }
     }
+
   }, [letters]);
 
   useEffect(() => {
@@ -43,7 +46,7 @@ function App() {
       return;
     }
   }, [mockLevel.current]);
-
+  
   useEffect(() => {
     if (
       showWord.length === 0 &&
@@ -54,6 +57,14 @@ function App() {
       startGame(level + 1);
     }
   }, [showWord]);
+  useEffect(() => {
+    if(boxPosition.length){
+      startBoxSky(boxPosition)
+      return;
+    }
+    clearInterval(skyInterval);
+  }, [boxPosition])
+  
 
   const startClickHandler = () => {
     intervalId.current = setInterval(() => {
@@ -69,15 +80,49 @@ function App() {
   };
 
   const windowShowWord = (result) => {
+    let count = 0;
     intervalId.current = setInterval(() => {
       const prevMockLevel = Number(mockLevel.current);
-      setBoxPosition((prev) => [...prev, Math.floor(Math.random() * 100)]);
+      generateBoxPosition(100);
       setShowWord((prev) => {
         mockLevel.current = prevMockLevel - 1;
         return [...prev, result[prevMockLevel]];
       });
+      count = count + 1;
     }, 3000);
   };
+
+  const generateBoxPosition = (limit,showWords)=>{
+    console.log("abc show words", showWords);
+    const randomNumber = Math.floor(Math.random() * limit);
+    if(boxPosition.some((item)=> item.left === randomNumber)){
+        generateBoxPosition();
+        return;
+    }
+    setBoxPosition((prev) => [...prev, { left: randomNumber, top:0 }]);
+     return;
+  } 
+
+  const startBoxSky = (positions) => {
+    console.log("function çalıştı", positions);
+    let newPositions = positions;
+    skyInterval.current = setInterval(() => {
+       newPositions.map((position,index)=> {
+        console.log("positions map", position);
+        if(position.top >= 50){
+          setShowWord(showWord.filter((word,_index)=> index !== _index))
+          newPositions = newPositions.filter((position,__index)=> index !== __index);
+          console.log("if içine girdi", position.top);
+          setBoxPosition(newPositions);
+        }
+        
+        position.top = position.top + 5
+        console.log("if dışı pos", newPositions);
+        setBoxPosition(newPositions);
+       });
+       
+    }, 5000);
+  }
 
   return (
     <div className="App">
@@ -89,7 +134,7 @@ function App() {
             return (
               <div
                 className="word-box"
-                style={{ left: `${boxPosition[index]}%` }}
+                style={{ left: `${boxPosition[index]?.left}%`, top: `${boxPosition[index]?.top}px`}}
                 key={index}
               >
                 {word.split("").map((letter, index) => (
