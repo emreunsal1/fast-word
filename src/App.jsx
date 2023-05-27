@@ -3,6 +3,7 @@ import Menu from "./components/Menu";
 import { generateRandomWord } from "./utils";
 import { getContext } from "./Context";
 import "./style/index.scss";
+import GameOverMenu from "./components/GameOverMenu";
 
 function App() {
   const { state, setState } = getContext();
@@ -12,22 +13,39 @@ function App() {
   const [letters, setLetters] = useState("");
   const [showWord, setShowWord] = useState([]);
   const [timer, setTimer] = useState(3);
+  const [point, setPoint] = useState(0);
 
   const intervalId = useRef(null);
   const mockLevel = useRef(null);
+  const healt = useRef(3);
 
   useEffect(() => {
-    if (showWord.includes(letters)) {
-      const result = showWord.filter((item) => item !== letters);
-      if (result.length || showWord[0] === letters) {
-        setShowWord(result);
+    
+   if(timer == 0 || timer == null && healt > 0){
+    console.log('timer', timer)
+    showWord.map((item) => {
+      if (item.word === letters && item.visible === true) {
+        item.visible = false;
+        setPoint((prev) => prev + 10);
         setLetters("");
       }
+    });
+    if (!showWord.some((item) => item.visible === true)) {
+      setShowWord([]);
     }
+   }
   }, [letters]);
 
   useEffect(() => {
-    if (timer === 0) {
+    if (healt.current === 0) {
+      setLetters("");
+      clearInterval(intervalId);
+      setShowWord([]);
+    }
+  }, [healt.current]);
+
+  useEffect(() => {
+    if (timer <= 0) {
       clearInterval(intervalId.current);
       intervalId.current = null;
       startGame(level);
@@ -47,23 +65,27 @@ function App() {
     if (
       showWord.length === 0 &&
       menuVisible === false &&
-      mockLevel.current === null
+      mockLevel.current === null &&
+      healt.current > 0
     ) {
       setLevel((prev) => prev + 1);
       startGame(level + 1);
-    } else if(showWord.length !== 0) {
-      console.log("tick")
+    } else if (showWord.length !== 0 && healt.current > 0) {
       const removeBoxInterval = setInterval(() => {
         const updatedBox = showWord.map((box) => {
-          const newTop = box.top + 5;
-          if (newTop >= 200) {
+          const newTop = box.top + 5 + level;
+          if (newTop >= 300 && box.visible) {
+            healt.current = healt.current - 1;
             return { ...box, visible: false };
           }
           return { ...box, top: newTop };
         });
+        if (!showWord.some((item) => item.visible === true)) {
+          return setShowWord([]);
+        }
         setShowWord(updatedBox);
       }, 100);
-      return ()=> clearInterval(removeBoxInterval);
+      return () => clearInterval(removeBoxInterval);
     }
   }, [showWord]);
 
@@ -82,23 +104,30 @@ function App() {
 
   const generateBox = (result) => {
     let count = 0;
-    intervalId.current = setInterval(() => {
-      const prevMockLevel = Number(mockLevel.current);
-      const xPostion = getRandomNumberInRange(0, 100);
-      setShowWord((prev) => {
-        mockLevel.current = prevMockLevel - 1;
-        return [
-          ...prev,
-          {
-            word: result[prevMockLevel],
-            top: 10,
-            left: xPostion,
-            visible: true,
-          },
-        ];
-      });
-      count = count + 1;
-    }, 3000);
+    intervalId.current = setInterval(
+      () => {
+        const prevMockLevel = Number(mockLevel.current);
+        const xPostion = getRandomNumberInRange(0, 100);
+        if(healt.current === 0){
+          clearInterval(intervalId);
+          return;
+        }
+        setShowWord((prev) => {
+          mockLevel.current = prevMockLevel - 1;
+          return [
+            ...prev,
+            {
+              word: result[prevMockLevel],
+              top: 10,
+              left: xPostion,
+              visible: true,
+            },
+          ];
+        });
+        count = count + 1;
+      },
+      3000 - level * 300 < 0 ? 100 : 3000 - level * 300
+    );
   };
 
   const getRandomNumberInRange = (min, max) => {
@@ -109,7 +138,12 @@ function App() {
     <div className="App">
       <div className="container">
         <Menu startClickHandler={startClickHandler} />
-        {!menuVisible && timer !== 0 && <div className="cont">{timer}</div>}
+        {!menuVisible && timer !== 0 && (
+          <div className="cont">timer:{timer}</div>
+        )}
+        <div className="level">level:{level}</div>
+        <div className="level">healt:{healt.current}</div>
+        <div className="level">point:{point}</div>
         <div className="fly-body">
           {showWord.map((box, index) => {
             if (box.visible) {
@@ -132,6 +166,7 @@ function App() {
             }
           })}
         </div>
+        {healt.current === 0 && <GameOverMenu/>}
         <div className="input-container">
           <input onChange={(e) => setLetters(e.target.value)} value={letters} />
         </div>
