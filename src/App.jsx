@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Menu from "./components/Menu";
+import Welcome from "./components/welcome";
 import { generateRandomWord } from "./utils";
 import { getContext } from "./Context";
 import "./style/index.scss";
@@ -7,33 +7,29 @@ import GameOverMenu from "./components/GameOverMenu";
 
 function App() {
   const { state, setState } = getContext();
-  const { menuVisible, level } = state;
-  const { setLevel } = setState;
+  const { isStart, level } = state;
+  const { setLevel, setIsStart } = setState;
   const [words, setWords] = useState();
   const [letters, setLetters] = useState("");
   const [showWord, setShowWord] = useState([]);
   const [timer, setTimer] = useState(3);
-  const [point, setPoint] = useState(0);
+  
 
   const intervalId = useRef(null);
   const mockLevel = useRef(null);
   const healt = useRef(3);
+  const point = useRef(0)
 
   useEffect(() => {
-    
-   if(timer == 0 || timer == null && healt > 0){
-    console.log('timer', timer)
-    showWord.map((item) => {
-      if (item.word === letters && item.visible === true) {
-        item.visible = false;
-        setPoint((prev) => prev + 10);
-        setLetters("");
-      }
-    });
-    if (!showWord.some((item) => item.visible === true)) {
-      setShowWord([]);
+    if (timer == 0 || (timer == null && healt > 0)) {
+      showWord.map((item) => {
+        if (item.word === letters && item.visible === true) {
+          item.visible = false;
+          point.current = point.current + 5;
+          setLetters("");
+        }
+      });
     }
-   }
   }, [letters]);
 
   useEffect(() => {
@@ -41,6 +37,7 @@ function App() {
       setLetters("");
       clearInterval(intervalId);
       setShowWord([]);
+      mockLevel.current = null;
     }
   }, [healt.current]);
 
@@ -64,7 +61,7 @@ function App() {
   useEffect(() => {
     if (
       showWord.length === 0 &&
-      menuVisible === false &&
+      isStart === false &&
       mockLevel.current === null &&
       healt.current > 0
     ) {
@@ -73,15 +70,19 @@ function App() {
     } else if (showWord.length !== 0 && healt.current > 0) {
       const removeBoxInterval = setInterval(() => {
         const updatedBox = showWord.map((box) => {
-          const newTop = box.top + 5 + level;
-          if (newTop >= 300 && box.visible) {
+          const newTop = box.top + 6 + level;
+          if (newTop >= 400 && box.visible) {
+            document.body.style.boxShadow = "inset 0px 0px 100px -10px red";
+            setTimeout(() => {
+              document.body.style.boxShadow = "none";
+            }, 200);
             healt.current = healt.current - 1;
             return { ...box, visible: false };
           }
           return { ...box, top: newTop };
         });
         if (!showWord.some((item) => item.visible === true)) {
-          return setShowWord([]);
+            return setShowWord([]);
         }
         setShowWord(updatedBox);
       }, 100);
@@ -96,6 +97,7 @@ function App() {
   };
 
   const startGame = (level) => {
+    healt.current = 3;
     const result = generateRandomWord(3, level * 3);
     setWords(result);
     mockLevel.current = level * 3 - 1;
@@ -107,8 +109,8 @@ function App() {
     intervalId.current = setInterval(
       () => {
         const prevMockLevel = Number(mockLevel.current);
-        const xPostion = getRandomNumberInRange(0, 100);
-        if(healt.current === 0){
+        const xPostion = getRandomNumberInRange(10, 90);
+        if (healt.current === 0) {
           clearInterval(intervalId);
           return;
         }
@@ -118,7 +120,7 @@ function App() {
             ...prev,
             {
               word: result[prevMockLevel],
-              top: 10,
+              top: -100,
               left: xPostion,
               visible: true,
             },
@@ -126,7 +128,7 @@ function App() {
         });
         count = count + 1;
       },
-      3000 - level * 300 < 0 ? 100 : 3000 - level * 300
+      3000 - level * 300 < 0 ? 100 : 3000 - level * 500
     );
   };
 
@@ -134,22 +136,32 @@ function App() {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
 
+  const resetGame = ()=>{
+    clearInterval(intervalId);
+    setShowWord([]);
+    setWords([]);
+    setTimer(3);
+    setLetters("");
+    mockLevel.current = null;
+    point.current = 0;
+    healt.current = 3;
+    setIsStart(true);
+  }
+
   return (
     <div className="App">
       <div className="container">
-        <Menu startClickHandler={startClickHandler} />
-        {!menuVisible && timer !== 0 && (
+        <Welcome startClickHandler={startClickHandler} />
+        {!isStart && timer !== 0 && (
           <div className="cont">timer:{timer}</div>
         )}
-        <div className="level">level:{level}</div>
-        <div className="level">healt:{healt.current}</div>
-        <div className="level">point:{point}</div>
         <div className="fly-body">
           {showWord.map((box, index) => {
-            if (box.visible) {
+            
               return (
                 <div
-                  className="word-box"
+                  className={`word-box ${!box.visible && "destroy"}`}
+                  
                   style={{ left: `${box.left}%`, top: `${box.top}px` }}
                   key={index}
                 >
@@ -163,13 +175,17 @@ function App() {
                   ))}
                 </div>
               );
-            }
+            
           })}
         </div>
-        {healt.current === 0 && <GameOverMenu/>}
-        <div className="input-container">
-          <input onChange={(e) => setLetters(e.target.value)} value={letters} />
-        </div>
+        {healt.current === 0 && <GameOverMenu score={point.current} resetGame={resetGame} />}
+         {!isStart && healt.current !== 0 &&  <div className="input-container">
+            <input
+              onChange={(e) => setLetters(e.target.value)}
+              value={letters}
+              placeholder="Write !!"
+            />
+          </div> }
       </div>
     </div>
   );

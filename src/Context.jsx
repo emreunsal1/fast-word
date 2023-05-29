@@ -4,10 +4,10 @@ const Context = createContext();
 function ContextProvider({ children }) {
   const [options, setoptions] = useState({ maxL: 20, minL: 3, length: 3 });
   const [level, setLevel] = useState(1);
-  const [menuVisible, setMenuVisible] = useState(true);
+  const [isStart, setIsStart] = useState(true);
   const value = {
-    state: { level, options, menuVisible },
-    setState: { setLevel, setoptions, setMenuVisible },
+    state: { level, options, isStart },
+    setState: { setLevel, setoptions, setIsStart },
     func: {},
   };
   return <Context.Provider value={value}>{children}</Context.Provider>;
