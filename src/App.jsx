@@ -4,6 +4,7 @@ import { generateRandomWord } from "./utils";
 import { getContext } from "./Context";
 import "./style/index.scss";
 import GameOverMenu from "./components/GameOverMenu";
+import Barbed from "./components/Barbed";
 
 function App() {
   const { state, setState } = getContext();
@@ -71,7 +72,7 @@ function App() {
       const removeBoxInterval = setInterval(() => {
         const updatedBox = showWord.map((box) => {
           const newTop = box.top + 6 + level;
-          if (newTop >= 400 && box.visible) {
+          if (newTop >= window.innerHeight - 250 && box.visible) {
             document.body.style.boxShadow = "inset 0px 0px 100px -10px red";
             setTimeout(() => {
               document.body.style.boxShadow = "none";
@@ -179,6 +180,7 @@ function App() {
           })}
         </div>
         {healt.current === 0 && <GameOverMenu score={point.current} resetGame={resetGame} />}
+        <Barbed count={Math.round(window.innerWidth / 150)}/>
          {!isStart && healt.current !== 0 &&  <div className="input-container">
             <input
               onChange={(e) => setLetters(e.target.value)}
