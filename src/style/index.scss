@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik+Puddles&display=swap");
+
 *,
 *::before,
 *::after {
@@ -18,6 +20,25 @@ body {
   .container {
     width: 100%;
     height: 100%;
+    .header {
+      width: 95%;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: "Rubik Puddles", cursive;
+      font-size: 20px;
+      color: white;
+      margin-top: 20px;
+      .score-wrapper {
+        .score {
+        }
+      }
+      .level-wrapper {
+        .level {
+        }
+      }
+    }
     .fly-body {
       width: 100%;
       height: 100%;
@@ -56,40 +77,38 @@ body {
         }
       }
     }
+    .timer {
+      color: white;
+      position: absolute;
+      width: 100%;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .count-wrapper {
+        font-family: "Rubik Puddles", cursive;
+        font-size: 150px;
+      }
+    }
     .input-container {
       position: absolute;
       bottom: 50px;
       width: 400px;
+      height: 50px;
       left: calc(50% - 200px);
 
       input {
-        width: 100%;
-        height: 45px;
         border: none;
         outline: none;
-        padding: 0px 7px;
-        border-radius: 6px;
-        color: #fff;
-        font-size: 15px;
         background-color: transparent;
+        color: white;
+        caret-color: transparent;
         text-align: center;
-        box-shadow: 3px 3px 10px rgba(0, 0, 0, 1),
-          -1px -1px 6px rgba(255, 255, 255, 0.4);
-        :focus {
-          border: 2px solid transparent;
-          color: #fff;
-          box-shadow: 3px 3px 10px rgba(0, 0, 0, 1),
-            -1px -1px 6px rgba(255, 255, 255, 0.4),
-            inset 3px 3px 10px rgba(0, 0, 0, 1),
-            inset -1px -1px 6px rgba(255, 255, 255, 0.4);
-        }
-      }
-
-      input:focus {
-        box-shadow: 3px 3px 10px rgba(0, 0, 0, 1),
-          -1px -1px 6px rgba(255, 255, 255, 0.4),
-          inset 3px 3px 10px rgba(0, 0, 0, 1),
-          inset -1px -1px 6px rgba(255, 255, 255, 0.4);
+        width: 100%;
+        height: 100%;
+        font-size: 50px;
       }
     }
   }
