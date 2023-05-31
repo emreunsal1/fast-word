@@ -70,7 +70,7 @@ function App() {
       startGame(level + 1);
     } else if (showWord.length !== 0 && healt.current > 0) {
       const removeBoxInterval = setInterval(() => {
-        if (healt.current === 0) {
+        if (healt.current <= 0) {
           clearInterval(removeBoxInterval);
         }
         const updatedBox = showWord.map((box) => {
@@ -147,6 +147,7 @@ function App() {
     mockLevel.current = null;
     point.current = 0;
     setIsStart(true);
+    healt.current = -1;
   };
 
   return (
@@ -158,17 +159,19 @@ function App() {
             <div className="count-wrapper">{timer}</div>
           </div>
         )}
-        <div className="header">
-          <div className="score-wrapper">
-            <div className="score"> Scrore: {point.current}</div>
+        {!isStart && healt.current !== 0 && (
+          <div className="header">
+            <div className="score-wrapper">
+              <div className="score"> Scrore: {point.current}</div>
+            </div>
+            <div className="healt-wrapper">
+              <div className="healt"> 🤍 {healt.current}</div>
+            </div>
+            <div className="level-wrapper">
+              <div className="level">Level: {level} </div>
+            </div>
           </div>
-          <div className="healt-wrapper">
-            <div className="healt"> 🤍 {healt.current}</div>
-          </div>
-          <div className="level-wrapper">
-            <div className="level">Level: {level} </div>
-          </div>
-        </div>
+        )}
         <div className="fly-body">
           {showWord.map((box, index) => {
             return (
